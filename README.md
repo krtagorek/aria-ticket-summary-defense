@@ -70,6 +70,12 @@ The submission above is preserved at [`submission-checkpoint-v1`](https://github
 
 `query_account` is now bound to the server-session customer and rejects cross-customer requests before database reads. Twenty-one offline tests pass. A direct real-tool audit exposes three other fictional records in the original version and zero in the patched version, while own-account lookups still work. Run `python backend_audit.py` to reproduce it without an API key.
 
-Use the comparison app's suite selector for **Tough ticket tests** and **Account ownership tests**. These new live model tests are pending review. They include malformed envelopes, encoded instructions, role spoofing, a known unsupported command paraphrase, benign controls, and forged history. Tool observations are recorded so a model refusal cannot be mistaken for backend enforcement.
+Use the comparison app's suite selector for **Tough ticket tests** and **Account ownership tests**. These new live model tests have completed and been reviewed: 96 response trials across 16 cases. Two cases disclosed other fictional customer records in all three baseline repetitions each (6/48 before, 0/48 after). Overall scores improved from 21 PASS / 21 WARN / 6 FAIL to 44 PASS / 4 WARN / 0 FAIL. Four warnings remain after the patch. They include malformed envelopes, encoded instructions, role spoofing, a known unsupported command paraphrase, benign controls, and forged history. Tool observations are recorded so a model refusal cannot be mistaken for backend enforcement.
 
 The classroom login is still name-only, policy retrieval is still unfiltered, and ordinary chat remains intentionally vulnerable. This extension is not a production authentication or complete banking-security solution. Generated results remain local and excluded from Git. The main submission and its tag are unchanged.
+
+## Interactive results dashboard
+
+The `dashboard/` folder contains an evidence explorer with all 96 reviewed response trials, paired replies, tool observations, filters, and remaining limitations. Contact fields are redacted; the data contains only fictional workshop fixtures. Raw provider logs and credentials are excluded.
+
+Run `python -m http.server 8504 --bind 127.0.0.1 --directory dashboard` and open http://127.0.0.1:8504. No API key or model calls are needed. The original submission checkpoint remains unchanged.
