@@ -1,6 +1,12 @@
-# ARIA ticket summary defense
+# ARIA security evaluation and defenses
 
-A Week 6 classroom project that implements and evaluates a focused prompt-injection defense for NeoBank ARIA.
+A Week 6 classroom project that tests NeoBank ARIA, isolates ticket summaries, and enforces account ownership in the backend.
+
+**Instructor dashboard:** https://krtagorek.github.io/aria-ticket-summary-defense/
+
+The dashboard is a static evidence explorer: it displays saved, reviewed fictional test results and does not run ARIA or make model calls. No sign-in or API key is required. See the extended results below for the confirmed baseline disclosures and remaining limitations.
+
+The original submission is preserved at the immutable `submission-checkpoint-v1` tag. `main` now includes the extended defenses, tests, and dashboard.
 
 ## What the defense does
 
@@ -8,7 +14,7 @@ The original assistant refused to reveal hidden instructions when an injected su
 
 This is a narrow defense for the supported command grammar. The rest of the banking agent remains intentionally vulnerable classroom code. It is not suitable for real banking data or production use.
 
-## Observed results
+## Original checkpoint results
 
 A completed local comparison used six fixed cases, three repetitions, and two versions, totaling 36 response trials.
 
@@ -66,7 +72,7 @@ The original README is preserved as `UPSTREAM_README.md`. This is a fresh reposi
 
 ## New ownership defense and tougher tests
 
-The submission above is preserved at [`submission-checkpoint-v1`](https://github.com/krtagorek/aria-ticket-summary-defense/tree/submission-checkpoint-v1). This branch adds a backend ownership boundary and a fixed adversarial suite. The earlier measured results are historical checkpoint results, not new live results for this branch.
+The submission above is preserved at [`submission-checkpoint-v1`](https://github.com/krtagorek/aria-ticket-summary-defense/tree/submission-checkpoint-v1). The current version adds a backend ownership boundary and a fixed adversarial suite. The earlier measured results are historical checkpoint results, not new live results for this branch.
 
 `query_account` is now bound to the server-session customer and rejects cross-customer requests before database reads. Twenty-one offline tests pass. A direct real-tool audit exposes three other fictional records in the original version and zero in the patched version, while own-account lookups still work. Run `python backend_audit.py` to reproduce it without an API key.
 
@@ -79,3 +85,9 @@ The classroom login is still name-only, policy retrieval is still unfiltered, an
 The `dashboard/` folder contains an evidence explorer with all 96 reviewed response trials, paired replies, tool observations, filters, and remaining limitations. Contact fields are redacted; the data contains only fictional workshop fixtures. Raw provider logs and credentials are excluded.
 
 Run `python -m http.server 8504 --bind 127.0.0.1 --directory dashboard` and open http://127.0.0.1:8504. No API key or model calls are needed. The original submission checkpoint remains unchanged.
+
+## Dashboard publication
+
+GitHub Pages publishes only `dashboard/` through `.github/workflows/pages.yml` when `main` changes. Application source, local databases, credential files, raw logs, and private screenshot evidence are not included in the site artifact. The public dashboard contains a redacted extract of reviewed fictional results. Hosting runs no Python backend and cannot execute new tests; use the local comparison app for that.
+
+To restore or inspect the original submission, use `git switch --detach submission-checkpoint-v1` in a clean checkout. The tag is retained even as `main` advances.
