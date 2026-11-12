@@ -1,0 +1,42 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.streamlit/
+
+# Local databases and test evidence
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+comparison_results*.json
+manifest.json
+offline-test-results.txt
+*.log
+*.csv
+*.jsonl
+
+# Reports and screenshots stay outside Git
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.docx
+*.zip
+
+# Local Python environments and caches
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Editor and system files
+.DS_Store
+.idea/
+.vscode/
