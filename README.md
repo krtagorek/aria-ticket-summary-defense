@@ -63,3 +63,13 @@ https://github.com/The-Gen-Academy/week6_neobank_aria_agent
 
 Upstream commit: `9aed6350836f0ea625be6a4ae637943153e1c96e`.
 The original README is preserved as `UPSTREAM_README.md`. This is a fresh repository containing the classroom source and the defense extension; upstream Git history and databases are not included. No new license or ownership claim is applied to the upstream material.
+
+## New ownership defense and tougher tests
+
+The submission above is preserved at [`submission-checkpoint-v1`](https://github.com/krtagorek/aria-ticket-summary-defense/tree/submission-checkpoint-v1). This branch adds a backend ownership boundary and a fixed adversarial suite. The earlier measured results are historical checkpoint results, not new live results for this branch.
+
+`query_account` is now bound to the server-session customer and rejects cross-customer requests before database reads. Twenty-one offline tests pass. A direct real-tool audit exposes three other fictional records in the original version and zero in the patched version, while own-account lookups still work. Run `python backend_audit.py` to reproduce it without an API key.
+
+Use the comparison app's suite selector for **Tough ticket tests** and **Account ownership tests**. These new live model tests are pending review. They include malformed envelopes, encoded instructions, role spoofing, a known unsupported command paraphrase, benign controls, and forged history. Tool observations are recorded so a model refusal cannot be mistaken for backend enforcement.
+
+The classroom login is still name-only, policy retrieval is still unfiltered, and ordinary chat remains intentionally vulnerable. This extension is not a production authentication or complete banking-security solution. Generated results remain local and excluded from Git. The main submission and its tag are unchanged.

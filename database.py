@@ -7,6 +7,28 @@ from seed_data import CUSTOMERS, TRANSACTIONS
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "neobank.db")
 
+ACCOUNT_ACCESS_DENIED = "Account access denied. You may only access your signed-in account."
+
+
+def authorized_account_details(conn, authenticated_user_id, requested_user_id):
+    """Backend boundary: principal comes from the server session, never the LLM.
+
+    Deny before reading either table. Do not reveal whether a denied ID exists.
+    Raw database helpers remain internal primitives, not exposed agent tools.
+    """
+    if not isinstance(authenticated_user_id, str) or not authenticated_user_id.strip():
+        return ACCOUNT_ACCESS_DENIED
+    if not isinstance(requested_user_id, str):
+        return ACCOUNT_ACCESS_DENIED
+    owner = authenticated_user_id.strip()
+    requested = requested_user_id.strip()
+    if requested != owner:
+        return ACCOUNT_ACCESS_DENIED
+    customer = get_customer(conn, owner)
+    if not customer:
+        return ACCOUNT_ACCESS_DENIED
+    return format_account_details(customer, get_transactions(conn, owner))
+
 
 def get_connection() -> sqlite3.Connection:
     """Get a SQLite connection with row factory for dict-like access."""

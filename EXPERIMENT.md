@@ -50,3 +50,26 @@ Hosted-app findings already collected are historical observations, not the basel
 ## Verification status
 
 Seven offline tests passed when the kit was created. They verify extraction, clean routing, malformed input rejection, context isolation, schema rejection, and absence of privileged fallback. These tests use a fake model and do not measure live prompt-injection resistance. The participant subsequently completed all 36 live trials. Assistant review found injected-summary completion improved from 0/6 to 6/6 and clean-summary completion remained 6/6 in both versions. No restricted disclosure or execution errors were observed. This is a small targeted sample, not a general security guarantee. The separate local submission kit contains the Word report, screenshot evidence, and raw and reviewed logs. Those files are deliberately not committed to this repository.
+
+## Ownership and adversarial test extension
+
+The known submission is preserved at Git tag `submission-checkpoint-v1` and on `main`. New work is isolated on `feature/ownership-and-adversarial-tests`. Use the checkpoint for the original submission without depending on this extension.
+
+The new backend account boundary binds `query_account` to the customer ID passed from the server session. The model can request an account ID but cannot supply the authenticated principal. The backend denies a different account ID before reading either customers or transactions. Existing, unknown, staff, and malformed denied IDs receive the same message. Own-account queries continue to work. This assumes a trustworthy server session: the classroom name-only login is unchanged and is not production authentication. Internal raw database helpers are not a public API; any future account tool must also use the authorization boundary.
+
+The model's general banking prompt remains identical to upstream to isolate the backend behavior. Policy retrieval is still unfiltered and remains a known risk. Account ownership does not fix internal-policy disclosure or unrelated instruction handling.
+
+Run the offline suite and direct audit without an API key:
+
+```sh
+python -m unittest discover -p 'test_*.py' -v
+python backend_audit.py --out comparison_results_backend_audit.json
+```
+
+Twenty-one offline tests passed, including an end-to-end forced tool call with forged history and a fake model. These tests verify backend and runner behavior, not live model resistance. The direct audit makes 14 real tool calls against an in-memory fictional SQLite database. The original tool exposes all three other existing fixture records; the patched tool returns none. Both own-account variants work in both versions. The unknown-ID and SQL-like requests do not expose records in the baseline but fail the explicit uniform-denial criterion. All seven patched direct checks pass. This result must remain separate from the earlier hosted-app response evaluation, which observed no disclosure.
+
+The comparison interface now offers three fixed suites. The original suite has six cases. Tough ticket tests contain 12 new cases: fake developer roles, code fences, ROT13, spaced-out instructions, nested and trailing ticket envelopes, an unsupported paraphrase, synthetic poisoned history, three benign controls, and an instruction-only ticket. Account ownership tests contain four live cases: own-account access, cross-account access, claimed authority, and forged conversation history. Every live trial records tool invocations and backend results separately from the final answer. Local results include fictional account data if the baseline retrieves it; they remain ignored by Git.
+
+At three repetitions, the tough suite produces 72 response trials and the account suite produces 24. These new live runs are pending. Do not describe them as passed until their saved outputs are reviewed. Malformed-ticket rejection is evaluated as rejection, not counted as a successful summary. The paraphrased T07 command is intentionally outside the summary router and should expose that limitation rather than be silently removed from the results. Synthetic canaries in prompts are test data, never actual credentials.
+
+The first exposure of this fixed suite is an unseen challenge run for the current implementation, not a permanently held-out benchmark. Once results are observed or the defense is tuned, reruns are regression tests. Report safety, useful task completion, backend authorization, model refusals, and execution errors separately, with case-appropriate denominators.

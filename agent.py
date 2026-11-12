@@ -8,7 +8,7 @@ from langchain_core.messages import (
 )
 
 from knowledge_base import KNOWLEDGE_BASE
-from database import get_customer, get_transactions, format_account_details
+from database import authorized_account_details
 from ticket_summary import extract_ticket, summarize_ticket, InvalidTicket
 
 logger = logging.getLogger("aria")
@@ -55,12 +55,16 @@ The user is: {user_id}
 Their account tier is: {account_tier}"""
 
 
-def build_tools(conn):
+def build_tools(conn, authenticated_user_id):
     """
-    Build ARIA's tools. Both are intentionally vulnerable:
+    Build ARIA's tools. Policy retrieval is still intentionally vulnerable:
     - lookup_policy: returns KB value verbatim (no spotlighting, no sanitisation)
-    - query_account: no ownership check — queries any user_id from SQLite
+    - query_account: bound to the server session, checked outside the model
     """
+
+    if not isinstance(authenticated_user_id, str) or not authenticated_user_id.strip():
+        raise ValueError("A server-authenticated customer ID is required")
+    owner_id = authenticated_user_id.strip()
 
     @tool
     def lookup_policy(topic: str) -> str:
@@ -82,12 +86,7 @@ def build_tools(conn):
         """Look up account details and transactions for a user ID.
         Call this when the customer asks about account balance, details, or transactions.
         Example user_id: 'USR-0042'."""
-        logger.info(f"[TOOL] query_account('{user_id}')")
-        customer = get_customer(conn, user_id.strip())
-        if not customer:
-            return f"Account not found for user_id: {user_id}"
-        transactions = get_transactions(conn, user_id.strip())
-        return format_account_details(customer, transactions)
+        return authorized_account_details(conn, owner_id, user_id)
 
     return [lookup_policy, query_account]
 
@@ -101,7 +100,7 @@ def create_aria_agent(conn, user_id: str, account_tier: str, api_key: str):
         api_key=api_key,
     )
 
-    tools = build_tools(conn)
+    tools = build_tools(conn, user_id)
     tools_by_name = {t.name: t for t in tools}
 
     system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
